@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { WatchlistManager } from './components/WatchlistManager';
 import { SingleChart } from './components/SingleChart';
 import { MultiChart } from './components/MultiChart';
-import { BarChart3, Grid3X3, TrendingUp } from 'lucide-react';
+import { BarChart3, Grid3X3 } from 'lucide-react';
 import { Watchlist } from './types/trading';
 
 type ViewMode = 'single' | 'multi';
@@ -33,43 +33,40 @@ function App() {
   }, [watchlists]);
 
   return (
-    <div className="h-screen bg-white flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm flex-shrink-0">
+    <div className="h-screen bg-gray-900 flex flex-col">
+      {/* Compact Header */}
+      <header className="bg-gray-800 border-b border-gray-700 px-4 py-2 shadow-sm flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">T</span>
+              </div>
+              <span className="text-white font-semibold text-sm">TradingHub</span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">TradingHub Pro</h1>
-              <p className="text-xs text-gray-500">Professional trading platform with real-time data</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            
+            <div className="flex bg-gray-700 rounded p-0.5">
               <button
                 onClick={() => setViewMode('single')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center space-x-2 ${
+                className={`px-2 py-1 text-xs font-medium rounded transition-colors flex items-center space-x-1 ${
                   viewMode === 'single'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-gray-600 text-white'
+                    : 'text-gray-300 hover:text-white'
                 }`}
               >
-                <BarChart3 className="w-4 h-4" />
-                <span>Single Chart</span>
+                <BarChart3 className="w-3 h-3" />
+                <span>Single</span>
               </button>
               <button
                 onClick={() => setViewMode('multi')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center space-x-2 ${
+                className={`px-2 py-1 text-xs font-medium rounded transition-colors flex items-center space-x-1 ${
                   viewMode === 'multi'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-gray-600 text-white'
+                    : 'text-gray-300 hover:text-white'
                 }`}
               >
-                <Grid3X3 className="w-4 h-4" />
-                <span>Multi Chart</span>
+                <Grid3X3 className="w-3 h-3" />
+                <span>Multi</span>
               </button>
             </div>
           </div>

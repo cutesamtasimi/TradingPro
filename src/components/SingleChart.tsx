@@ -54,10 +54,10 @@ export function SingleChart({ symbol }: SingleChartProps) {
 
   if (loading && !chartData) {
     return (
-      <div className="h-full flex items-center justify-center bg-white">
+      <div className="h-full flex items-center justify-center bg-gray-900">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
-          <div className="text-gray-600">Loading chart data...</div>
+          <div className="text-gray-400">Loading chart data...</div>
         </div>
       </div>
     );
@@ -65,9 +65,9 @@ export function SingleChart({ symbol }: SingleChartProps) {
 
   if (error && !chartData) {
     return (
-      <div className="h-full flex items-center justify-center bg-white">
+      <div className="h-full flex items-center justify-center bg-gray-900">
         <div className="text-center">
-          <div className="text-red-500 mb-2">{error}</div>
+          <div className="text-red-400 mb-2">{error}</div>
           <button
             onClick={fetchData}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -80,21 +80,21 @@ export function SingleChart({ symbol }: SingleChartProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Compact Header */}
-      <div className="p-2 border-b border-gray-200 flex-shrink-0">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-3">
+    <div className="h-full flex flex-col bg-gray-900">
+      {/* Compact Header with Symbol Info and Timeframes */}
+      <div className="px-4 py-2 border-b border-gray-700 flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <h2 className="text-lg font-bold text-gray-900">{symbol}</h2>
+              <h2 className="text-lg font-bold text-white">{symbol}</h2>
               {loading && (
                 <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />
               )}
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-lg font-bold">${currentPrice.toFixed(2)}</span>
+              <span className="text-lg font-bold text-white">${currentPrice.toFixed(2)}</span>
               <div className={`flex items-center space-x-1 text-sm ${
-                priceChange >= 0 ? 'text-green-600' : 'text-red-600'
+                priceChange >= 0 ? 'text-green-400' : 'text-red-400'
               }`}>
                 <span className="font-medium">
                   {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)} ({priceChangePercent >= 0 ? '+' : ''}{priceChangePercent.toFixed(2)}%)
@@ -103,20 +103,20 @@ export function SingleChart({ symbol }: SingleChartProps) {
             </div>
           </div>
           
-          <button
-            onClick={fetchData}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Refresh data"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
+          <div className="flex items-center space-x-4">
+            <TimeframeSelector
+              selectedTimeframe={selectedTimeframe}
+              onTimeframeChange={setSelectedTimeframe}
+            />
+            <button
+              onClick={fetchData}
+              className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors"
+              title="Refresh data"
+            >
+              <RefreshCw className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
         </div>
-        
-        <TimeframeSelector
-          selectedTimeframe={selectedTimeframe}
-          onTimeframeChange={setSelectedTimeframe}
-          className="mb-1"
-        />
       </div>
       
       {/* Chart Container - Takes remaining space */}

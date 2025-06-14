@@ -9,18 +9,15 @@ interface TimeframeSelectorProps {
 }
 
 const defaultTimeframes: { label: string; value: Timeframe }[] = [
+  { label: '1m', value: '1m' },
+  { label: '5m', value: '5m' },
+  { label: '15m', value: '15m' },
+  { label: '30m', value: '1h' },
+  { label: '1h', value: '1h' },
+  { label: '4h', value: '4h' },
   { label: '1D', value: '1d' },
-  { label: '2D', value: '2d' },
-  { label: '3D', value: '3d' },
-  { label: '4D', value: '4d' },
   { label: '1W', value: '1w' },
-  { label: '2W', value: '2w' },
-  { label: '3W', value: '3w' },
-  { label: '1M', value: '1M' },
-  { label: '5W', value: '5w' },
-  { label: '6W', value: '6w' },
-  { label: '2M', value: '2M' },
-  { label: '3M', value: '3M' }
+  { label: '1M', value: '1M' }
 ];
 
 export function TimeframeSelector({ selectedTimeframe, onTimeframeChange, className = '' }: TimeframeSelectorProps) {
@@ -82,7 +79,7 @@ export function TimeframeSelector({ selectedTimeframe, onTimeframeChange, classN
                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                   selectedTimeframe === value
                     ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
                 {label}
@@ -103,29 +100,29 @@ export function TimeframeSelector({ selectedTimeframe, onTimeframeChange, classN
       <div className="relative">
         <button
           onClick={() => setShowCustom(!showCustom)}
-          className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+          className="p-1 text-gray-400 hover:text-gray-300 hover:bg-gray-700 rounded transition-colors"
           title="Add custom timeframe"
         >
           <Plus className="w-3 h-3" />
         </button>
 
         {showCustom && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-20 min-w-48">
+          <div className="absolute top-full right-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg p-3 z-20 min-w-48">
             <div className="space-y-2">
-              <h4 className="text-xs font-medium text-gray-900">Add Custom Timeframe</h4>
+              <h4 className="text-xs font-medium text-gray-300">Add Custom Timeframe</h4>
               <div className="flex space-x-1">
                 <input
                   type="number"
                   value={customValue}
                   onChange={(e) => setCustomValue(e.target.value)}
                   placeholder="Value"
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-2 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-white"
                   min="1"
                 />
                 <select
                   value={customUnit}
                   onChange={(e) => setCustomUnit(e.target.value as any)}
-                  className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                  className="px-2 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-white"
                 >
                   <option value="days">Days</option>
                   <option value="weeks">Weeks</option>
@@ -141,7 +138,7 @@ export function TimeframeSelector({ selectedTimeframe, onTimeframeChange, classN
                 </button>
                 <button
                   onClick={() => setShowCustom(false)}
-                  className="flex-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors"
+                  className="flex-1 px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded hover:bg-gray-500 transition-colors"
                 >
                   Cancel
                 </button>

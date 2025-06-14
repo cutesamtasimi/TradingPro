@@ -25,6 +25,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
   const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, price: 0, rsi: 0, timestamp: 0, visible: false });
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Limit to 300 candles by default, but allow zoom to show more/less
   const maxCandles = Math.floor(300 / zoomLevel);
@@ -36,15 +37,13 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     if (showRSI) {
       drawRSIChart();
     }
-  }, [displayCandles, displayRsi, showRSI, zoomLevel, panOffset]);
+  }, [displayCandles, displayRsi, showRSI, zoomLevel, panOffset, isExpanded]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        setZoomLevel(prev => Math.max(0.3, Math.min(5, prev * delta)));
-      }
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      setZoomLevel(prev => Math.max(0.3, Math.min(5, prev * delta)));
     };
 
     const container = containerRef.current;
@@ -120,6 +119,14 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     setTooltip(prev => ({ ...prev, visible: false }));
   };
 
+  const handleMouseEnter = () => {
+    setIsExpanded(true);
+  };
+
+  const handleMouseLeaveContainer = () => {
+    setIsExpanded(false);
+  };
+
   const drawCandlestickChart = () => {
     const canvas = candleChartRef.current;
     if (!canvas || displayCandles.length === 0) return;
@@ -136,7 +143,8 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const width = rect.width;
     const height = rect.height;
     
-    ctx.fillStyle = '#ffffff';
+    // Dark theme background
+    ctx.fillStyle = '#1f2937';
     ctx.fillRect(0, 0, width, height);
     
     const marginTop = 15;
@@ -162,7 +170,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const adjustedLogRange = adjustedLogMax - adjustedLogMin;
     
     // Draw background grid
-    ctx.strokeStyle = '#f8f9fa';
+    ctx.strokeStyle = '#374151';
     ctx.lineWidth = 1;
     
     const priceGridLines = 5;
@@ -184,7 +192,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     }
     
     // Draw price labels (logarithmic)
-    ctx.fillStyle = '#6b7280';
+    ctx.fillStyle = '#9ca3af';
     ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -199,6 +207,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     // Draw time labels with major periods
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
+    ctx.fillStyle = '#6b7280';
     const labelInterval = Math.max(1, Math.floor(displayCandles.length / 6));
     
     for (let i = 0; i < displayCandles.length; i += labelInterval) {
@@ -236,19 +245,19 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
       const bodyTop = Math.min(openY, closeY);
       const bodyHeight = Math.max(1, Math.abs(closeY - openY));
       
-      ctx.fillStyle = color; // Always fill with color
+      ctx.fillStyle = color;
       ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
       
       // Add border for red candles to make them more visible
       if (!isGreen) {
-        ctx.strokeStyle = '#dc2626'; // Darker red border
+        ctx.strokeStyle = '#dc2626';
         ctx.lineWidth = 1;
         ctx.strokeRect(x - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
       }
     });
     
     // Draw chart border
-    ctx.strokeStyle = '#e5e7eb';
+    ctx.strokeStyle = '#4b5563';
     ctx.lineWidth = 1;
     ctx.strokeRect(marginLeft, marginTop, chartWidth, chartHeight);
   };
@@ -269,7 +278,8 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const width = rect.width;
     const height = rect.height;
     
-    ctx.fillStyle = '#ffffff';
+    // Dark theme background
+    ctx.fillStyle = '#1f2937';
     ctx.fillRect(0, 0, width, height);
     
     const marginTop = 10;
@@ -286,14 +296,14 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const rsiRange = rsiMax - rsiMin;
     
     // Draw background
-    ctx.fillStyle = '#fafafa';
+    ctx.fillStyle = '#374151';
     ctx.fillRect(marginLeft, marginTop, chartWidth, chartHeight);
     
     // Draw RSI background zones (40-60 light purple)
     const zone40Y = marginTop + (chartHeight * (rsiMax - 40)) / rsiRange;
     const zone60Y = marginTop + (chartHeight * (rsiMax - 60)) / rsiRange;
     
-    ctx.fillStyle = 'rgba(147, 51, 234, 0.08)';
+    ctx.fillStyle = 'rgba(147, 51, 234, 0.1)';
     ctx.fillRect(marginLeft, zone60Y, chartWidth, zone40Y - zone60Y);
     
     // Draw Bollinger Bands background (light green between bands)
@@ -314,28 +324,26 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     }
     
     ctx.closePath();
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.1)';
     ctx.fill();
     
-    // Draw RSI reference lines with borders
-    ctx.strokeStyle = '#d1d5db';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([]);
-    
-    // 40, 50, 60 lines with solid borders
+    // Draw RSI reference lines with dashed borders for 40, 50, 60
     const referenceLines = [40, 50, 60];
     referenceLines.forEach(value => {
       const y = marginTop + (chartHeight * (rsiMax - value)) / rsiRange;
-      ctx.strokeStyle = value === 50 ? '#9ca3af' : '#d1d5db';
+      ctx.strokeStyle = value === 50 ? '#6b7280' : '#4b5563';
       ctx.lineWidth = value === 50 ? 1.5 : 1;
+      ctx.setLineDash([3, 3]); // Dashed line
       ctx.beginPath();
       ctx.moveTo(marginLeft, y);
       ctx.lineTo(marginLeft + chartWidth, y);
       ctx.stroke();
     });
     
+    ctx.setLineDash([]); // Reset to solid lines
+    
     // RSI labels
-    ctx.fillStyle = '#6b7280';
+    ctx.fillStyle = '#9ca3af';
     ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -346,9 +354,9 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
       ctx.fillText(value.toString(), marginLeft - 5, y);
     });
     
-    // Draw Bollinger Bands with borders
+    // Draw Bollinger Bands with light green borders
     ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1;
     ctx.setLineDash([]);
     
     // Upper Bollinger Band
@@ -408,24 +416,31 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     ctx.stroke();
     
     // Draw chart border
-    ctx.strokeStyle = '#e5e7eb';
+    ctx.strokeStyle = '#4b5563';
     ctx.lineWidth = 1;
     ctx.strokeRect(marginLeft, marginTop, chartWidth, chartHeight);
   };
 
   return (
-    <div ref={containerRef} className="bg-white border border-gray-200 rounded-lg shadow-sm p-2 flex flex-col h-full">
+    <div 
+      ref={containerRef} 
+      className={`bg-gray-800 border border-gray-600 rounded-lg shadow-sm p-2 flex flex-col h-full transition-all duration-300 ${
+        isExpanded ? 'transform scale-105' : ''
+      }`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeaveContainer}
+    >
       <div className="flex items-center justify-between mb-1">
-        <div className="text-xs text-gray-500">
-          {displayCandles.length} candles • Zoom: {(zoomLevel * 100).toFixed(0)}% • Ctrl+Scroll to zoom
+        <div className="text-xs text-gray-400">
+          {displayCandles.length} candles • Zoom: {(zoomLevel * 100).toFixed(0)}% • Scroll to zoom
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold text-gray-900">
+          <div className="text-lg font-bold text-white">
             ${displayCandles.length > 0 ? formatPrice(displayCandles[displayCandles.length - 1].close) : '0.00'}
           </div>
           <div className={`text-xs font-medium ${
             displayCandles.length > 1 && displayCandles[displayCandles.length - 1].close > displayCandles[displayCandles.length - 2].close
-              ? 'text-green-600' : 'text-red-600'
+              ? 'text-green-400' : 'text-red-400'
           }`}>
             {displayCandles.length > 1 && (
               <>
@@ -442,7 +457,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
       </div>
       
       <div className="flex-1 flex flex-col min-h-0">
-        <div className={showRSI ? "h-3/5" : "h-full"}>
+        <div className={showRSI ? "h-3/4" : "h-full"}>
           <canvas
             ref={candleChartRef}
             className="w-full h-full cursor-crosshair"
@@ -453,12 +468,12 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
         
         {showRSI && (
           <>
-            <div className="h-1 bg-gray-100 border-t border-b border-gray-200 my-1 flex items-center justify-center">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            <div className="h-1 bg-gray-700 border-t border-b border-gray-600 my-1 flex items-center justify-center">
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent"></div>
             </div>
             
-            <div className="h-2/5">
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+            <div className="h-1/4">
+              <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
                 <span className="font-medium">RSI (14) • Scale: 20-100</span>
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-1">
@@ -489,7 +504,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
       {/* Tooltip */}
       {tooltip.visible && (
         <div
-          className="fixed bg-gray-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-50 shadow-lg"
+          className="fixed bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none z-50 shadow-lg border border-gray-600"
           style={{
             left: tooltip.x + 10,
             top: tooltip.y - 10,
