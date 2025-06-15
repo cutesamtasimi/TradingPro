@@ -23,7 +23,7 @@ export interface RSIData {
   lowerBB: number;
 }
 
-export type Timeframe = '1d' | '2d' | '3d' | '4d' | '1w' | '2w' | '3w' | '5w' | '6w' | '1M' | '2M' | '3M' | '6M' | 
+export type Timeframe = '1d' | '2d' | '3d' | '4d' | '1w' | '6d' | '7d' | '2w' | '3w' | '1M' | '5w' | '6w' | '2M' | '3M' | 
   // Legacy timeframes for backward compatibility
   '1m' | '5m' | '15m' | '1h' | '4h' | '1Y';
 

@@ -165,17 +165,17 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
   };
 
   return (
-    <div className="bg-gray-800 border-l border-gray-700 w-64 flex flex-col flex-shrink-0">
+    <div className="bg-white border-l-2 border-gray-300 w-72 flex flex-col flex-shrink-0">
       {/* Compact Watchlist Header */}
-      <div className="p-2 border-b border-gray-700">
+      <div className="p-3 border-b-2 border-gray-300 bg-gray-50">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-white">Watchlists</h2>
+          <h2 className="text-sm font-semibold text-gray-900">Watchlists</h2>
           <button
             onClick={() => setShowCreateWatchlist(true)}
-            className="p-1 hover:bg-gray-700 rounded transition-colors"
+            className="p-1 hover:bg-gray-200 rounded transition-colors border border-gray-300"
             title="Create new watchlist"
           >
-            <FolderPlus className="w-3 h-3 text-gray-400" />
+            <FolderPlus className="w-3 h-3 text-gray-600" />
           </button>
         </div>
 
@@ -185,13 +185,13 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
             <div key={watchlist.id} className="relative group">
               <button
                 onClick={() => setActiveWatchlistId(watchlist.id)}
-                className={`px-1.5 py-0.5 text-xs font-medium rounded transition-colors flex items-center space-x-1 ${
+                className={`px-2 py-1 text-xs font-medium rounded transition-colors flex items-center space-x-1 border ${
                   activeWatchlistId === watchlist.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    ? 'bg-blue-500 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                <span className="truncate max-w-12">{watchlist.name}</span>
+                <span className="truncate max-w-16">{watchlist.name}</span>
                 <span className="text-xs opacity-75">({watchlist.symbols.length})</span>
               </button>
               
@@ -205,14 +205,14 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
               )}
 
               {showWatchlistMenu === watchlist.id && (
-                <div className="absolute top-full right-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-20 min-w-24">
+                <div className="absolute top-full right-0 mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg z-20 min-w-28">
                   <button
                     onClick={() => {
                       setEditingWatchlist(watchlist.id);
                       setEditWatchlistName(watchlist.name);
                       setShowWatchlistMenu(null);
                     }}
-                    className="w-full px-2 py-1 text-left text-xs hover:bg-gray-700 flex items-center space-x-1 text-gray-300"
+                    className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 flex items-center space-x-1 text-gray-700"
                   >
                     <Edit2 className="w-2 h-2" />
                     <span>Rename</span>
@@ -220,7 +220,7 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
                   {watchlists.length > 1 && (
                     <button
                       onClick={() => deleteWatchlist(watchlist.id)}
-                      className="w-full px-2 py-1 text-left text-xs hover:bg-gray-700 text-red-400 flex items-center space-x-1"
+                      className="w-full px-2 py-1 text-left text-xs hover:bg-gray-100 text-red-600 flex items-center space-x-1"
                     >
                       <Trash2 className="w-2 h-2" />
                       <span>Delete</span>
@@ -234,21 +234,21 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
 
         {/* Create/Edit Forms */}
         {showCreateWatchlist && (
-          <div className="mb-2 p-2 bg-gray-700 rounded">
+          <div className="mb-2 p-2 bg-white rounded border border-gray-300">
             <div className="flex space-x-1">
               <input
                 type="text"
                 value={newWatchlistName}
                 onChange={(e) => setNewWatchlistName(e.target.value)}
                 placeholder="Name"
-                className="flex-1 px-2 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 bg-gray-800 text-white"
+                className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 maxLength={20}
                 onKeyPress={(e) => e.key === 'Enter' && createWatchlist()}
               />
-              <button onClick={createWatchlist} className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600">
+              <button onClick={createWatchlist} className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 border border-blue-600">
                 <Save className="w-3 h-3" />
               </button>
-              <button onClick={() => setShowCreateWatchlist(false)} className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded hover:bg-gray-500">
+              <button onClick={() => setShowCreateWatchlist(false)} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 border border-gray-300">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -256,20 +256,20 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
         )}
 
         {editingWatchlist && (
-          <div className="mb-2 p-2 bg-gray-700 rounded">
+          <div className="mb-2 p-2 bg-white rounded border border-gray-300">
             <div className="flex space-x-1">
               <input
                 type="text"
                 value={editWatchlistName}
                 onChange={(e) => setEditWatchlistName(e.target.value)}
-                className="flex-1 px-2 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 bg-gray-800 text-white"
+                className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 maxLength={20}
                 onKeyPress={(e) => e.key === 'Enter' && updateWatchlistName(editingWatchlist, editWatchlistName)}
               />
-              <button onClick={() => updateWatchlistName(editingWatchlist, editWatchlistName)} className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600">
+              <button onClick={() => updateWatchlistName(editingWatchlist, editWatchlistName)} className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 border border-blue-600">
                 <Save className="w-3 h-3" />
               </button>
-              <button onClick={() => { setEditingWatchlist(null); setEditWatchlistName(''); }} className="px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded hover:bg-gray-500">
+              <button onClick={() => { setEditingWatchlist(null); setEditWatchlistName(''); }} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 border border-gray-300">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -279,7 +279,7 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
         {/* Compact Controls */}
         {activeWatchlist && (
           <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-gray-600">
               {activeWatchlist.symbols.length}/250
             </div>
             <div className="flex items-center space-x-1">
@@ -288,19 +288,19 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
                   setShowPopular(!showPopular);
                   setShowSearch(false);
                 }}
-                className="p-1 hover:bg-gray-700 rounded transition-colors"
+                className="p-1 hover:bg-gray-200 rounded transition-colors border border-gray-300"
                 title="Popular symbols"
               >
-                <Globe className="w-3 h-3 text-gray-400" />
+                <Globe className="w-3 h-3 text-gray-600" />
               </button>
               <button
                 onClick={() => {
                   setShowSearch(!showSearch);
                   setShowPopular(false);
                 }}
-                className="p-1 hover:bg-gray-700 rounded transition-colors"
+                className="p-1 hover:bg-gray-200 rounded transition-colors border border-gray-300"
               >
-                {showSearch ? <X className="w-3 h-3 text-gray-400" /> : <Plus className="w-3 h-3 text-gray-400" />}
+                {showSearch ? <X className="w-3 h-3 text-gray-600" /> : <Plus className="w-3 h-3 text-gray-600" />}
               </button>
             </div>
           </div>
@@ -308,12 +308,12 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
 
         {/* Compact Popular Symbols */}
         {showPopular && (
-          <div className="mt-2 p-2 bg-gray-700 rounded text-xs">
+          <div className="mt-2 p-2 bg-white rounded text-xs border border-gray-300">
             <div className="space-y-1">
               <div>
                 <div className="flex items-center space-x-1 mb-1">
-                  <Globe className="w-2 h-2 text-blue-400" />
-                  <span className="font-medium text-gray-300">US</span>
+                  <Globe className="w-2 h-2 text-blue-500" />
+                  <span className="font-medium text-gray-700">US</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {POPULAR_SYMBOLS.US.slice(0, 6).map(symbol => (
@@ -321,7 +321,7 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
                       key={symbol}
                       onClick={() => addPopularSymbol(symbol)}
                       disabled={activeWatchlist?.symbols.includes(symbol)}
-                      className="px-1 py-0.5 bg-blue-600 text-blue-100 rounded hover:bg-blue-500 transition-colors disabled:opacity-50 text-xs"
+                      className="px-1 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors disabled:opacity-50 text-xs border border-blue-200"
                     >
                       {symbol}
                     </button>
@@ -330,8 +330,8 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
               </div>
               <div>
                 <div className="flex items-center space-x-1 mb-1">
-                  <MapPin className="w-2 h-2 text-orange-400" />
-                  <span className="font-medium text-gray-300">IN</span>
+                  <MapPin className="w-2 h-2 text-orange-500" />
+                  <span className="font-medium text-gray-700">IN</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {POPULAR_SYMBOLS.INDIAN.slice(0, 6).map(symbol => (
@@ -339,7 +339,7 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
                       key={symbol}
                       onClick={() => addPopularSymbol(symbol)}
                       disabled={activeWatchlist?.symbols.includes(symbol)}
-                      className="px-1 py-0.5 bg-orange-600 text-orange-100 rounded hover:bg-orange-500 transition-colors disabled:opacity-50 text-xs"
+                      className="px-1 py-0.5 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors disabled:opacity-50 text-xs border border-orange-200"
                     >
                       {symbol.replace('.NS', '')}
                     </button>
@@ -354,37 +354,37 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
         {showSearch && (
           <div className="mt-2 relative">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 w-3 h-3" />
               <input
                 type="text"
                 placeholder="Search symbols..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-6 pr-3 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 bg-gray-800 text-white"
+                className="w-full pl-6 pr-3 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 autoFocus
               />
             </div>
             
             {searchLoading && (
-              <div className="absolute top-full left-0 right-0 bg-gray-800 border border-gray-600 rounded shadow-lg mt-1 p-2 z-10">
-                <div className="text-center text-gray-400 text-xs">Searching...</div>
+              <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-300 rounded shadow-lg mt-1 p-2 z-10">
+                <div className="text-center text-gray-600 text-xs">Searching...</div>
               </div>
             )}
             
             {searchResults.length > 0 && !searchLoading && (
-              <div className="absolute top-full left-0 right-0 bg-gray-800 border border-gray-600 rounded shadow-lg mt-1 max-h-32 overflow-y-auto z-10">
+              <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-300 rounded shadow-lg mt-1 max-h-32 overflow-y-auto z-10">
                 {searchResults.map((symbol) => (
                   <button
                     key={symbol.symbol}
                     onClick={() => addToWatchlist(symbol.symbol)}
                     disabled={activeWatchlist?.symbols.includes(symbol.symbol)}
-                    className="w-full px-2 py-1 hover:bg-gray-700 flex items-center justify-between text-left disabled:opacity-50 text-xs"
+                    className="w-full px-2 py-1 hover:bg-gray-100 flex items-center justify-between text-left disabled:opacity-50 text-xs"
                   >
                     <div>
-                      <div className="font-medium text-white">{symbol.symbol}</div>
-                      <div className="text-gray-400 truncate">{symbol.name}</div>
+                      <div className="font-medium text-gray-900">{symbol.symbol}</div>
+                      <div className="text-gray-600 truncate">{symbol.name}</div>
                     </div>
-                    <Plus className="w-3 h-3 text-gray-400" />
+                    <Plus className="w-3 h-3 text-gray-500" />
                   </button>
                 ))}
               </div>
@@ -394,11 +394,11 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
       </div>
 
       {/* Compact Watchlist Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-gray-50">
         {loading && (!activeWatchlistData || activeWatchlistData.symbolData.length === 0) ? (
-          <div className="p-2 text-center text-gray-400 text-xs">Loading...</div>
+          <div className="p-3 text-center text-gray-600 text-xs">Loading...</div>
         ) : !activeWatchlist || activeWatchlist.symbols.length === 0 ? (
-          <div className="p-2 text-center text-gray-400 text-xs">
+          <div className="p-3 text-center text-gray-600 text-xs">
             <div className="mb-1">Empty watchlist</div>
             <div className="text-xs">Click + to add symbols</div>
           </div>
@@ -406,8 +406,8 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
           activeWatchlistData?.symbolData.map((symbol) => (
             <div
               key={symbol.symbol}
-              className={`group p-1.5 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors ${
-                selectedSymbol === symbol.symbol ? 'bg-gray-700 border-l-2 border-l-blue-500' : ''
+              className={`group p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors ${
+                selectedSymbol === symbol.symbol ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
               }`}
               onClick={() => onSymbolSelect(symbol.symbol)}
             >
@@ -415,33 +415,31 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-white text-xs truncate">{symbol.symbol}</span>
+                      <span className="font-semibold text-gray-900 text-sm truncate">{symbol.symbol}</span>
                       {symbol.symbol.includes('.NS') && (
-                        <span className="text-xs bg-orange-600 text-orange-100 px-1 rounded">NSE</span>
+                        <span className="text-xs bg-orange-100 text-orange-700 px-1 rounded border border-orange-200">NSE</span>
                       )}
                       {symbol.symbol.includes('-USD') && (
-                        <span className="text-xs bg-yellow-600 text-yellow-100 px-1 rounded">₿</span>
+                        <span className="text-xs bg-yellow-100 text-yellow-700 px-1 rounded border border-yellow-200">₿</span>
                       )}
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <span className="font-bold text-xs text-white">${symbol.price.toFixed(2)}</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFromWatchlist(symbol.symbol);
-                        }}
-                        className="p-0.5 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-2 h-2 text-gray-400" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromWatchlist(symbol.symbol);
+                      }}
+                      className="p-0.5 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-gray-300"
+                    >
+                      <X className="w-2 h-2 text-gray-600" />
+                    </button>
                   </div>
-                  <div className="text-xs text-gray-400 mb-1 truncate">{symbol.name}</div>
-                  <div className="flex items-center justify-end">
+                  <div className="text-xs text-gray-600 mb-1 truncate">{symbol.name}</div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-gray-900">${symbol.price.toFixed(2)}</span>
                     <div className={`flex items-center space-x-1 text-xs ${
-                      symbol.change >= 0 ? 'text-green-400' : 'text-red-400'
+                      symbol.change >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {symbol.change >= 0 ? <TrendingUp className="w-2 h-2" /> : <TrendingDown className="w-2 h-2" />}
+                      {symbol.change >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       <span>{symbol.changePercent >= 0 ? '+' : ''}{symbol.changePercent.toFixed(1)}%</span>
                     </div>
                   </div>
@@ -452,8 +450,8 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
         )}
       </div>
 
-      <div className="p-1 border-t border-gray-700 bg-gray-800">
-        <div className="text-xs text-gray-500 text-center">
+      <div className="p-2 border-t-2 border-gray-300 bg-gray-50">
+        <div className="text-xs text-gray-600 text-center">
           Auto-refresh: 30s
         </div>
       </div>

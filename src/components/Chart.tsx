@@ -26,11 +26,15 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastMouseX, setLastMouseX] = useState(0);
 
-  // Limit to 300 candles by default, but allow zoom to show more/less
-  const maxCandles = Math.floor(300 / zoomLevel);
-  const displayCandles = candles.slice(-maxCandles);
-  const displayRsi = rsi.slice(-maxCandles);
+  // Calculate visible candles based on zoom and pan
+  const maxCandles = Math.floor(200 / zoomLevel);
+  const startIndex = Math.max(0, Math.min(candles.length - maxCandles, candles.length - maxCandles + panOffset));
+  const endIndex = Math.min(candles.length, startIndex + maxCandles);
+  const displayCandles = candles.slice(startIndex, endIndex);
+  const displayRsi = rsi.slice(startIndex, endIndex);
 
   useEffect(() => {
     drawCandlestickChart();
@@ -46,12 +50,39 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
       setZoomLevel(prev => Math.max(0.3, Math.min(5, prev * delta)));
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const deltaX = e.clientX - lastMouseX;
+        const sensitivity = 0.5;
+        const panDelta = Math.round(deltaX * sensitivity);
+        
+        setPanOffset(prev => {
+          const newOffset = prev - panDelta;
+          const maxOffset = Math.max(0, candles.length - maxCandles);
+          return Math.max(-maxOffset, Math.min(0, newOffset));
+        });
+        
+        setLastMouseX(e.clientX);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
     const container = containerRef.current;
     if (container) {
       container.addEventListener('wheel', handleWheel, { passive: false });
-      return () => container.removeEventListener('wheel', handleWheel);
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        container.removeEventListener('wheel', handleWheel);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
     }
-  }, []);
+  }, [isDragging, lastMouseX, maxCandles, candles.length]);
 
   const formatPrice = (price: number): string => {
     if (price >= 1000) {
@@ -82,7 +113,12 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent, chartType: 'price' | 'rsi') => {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setLastMouseX(e.clientX);
+  };
+
+  const handleMouseMoveChart = (e: React.MouseEvent, chartType: 'price' | 'rsi') => {
     const canvas = chartType === 'price' ? candleChartRef.current : rsiChartRef.current;
     if (!canvas || displayCandles.length === 0) return;
 
@@ -143,8 +179,8 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const width = rect.width;
     const height = rect.height;
     
-    // Dark theme background
-    ctx.fillStyle = '#1f2937';
+    // White background
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
     
     const marginTop = 15;
@@ -170,7 +206,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const adjustedLogRange = adjustedLogMax - adjustedLogMin;
     
     // Draw background grid
-    ctx.strokeStyle = '#374151';
+    ctx.strokeStyle = '#e5e7eb';
     ctx.lineWidth = 1;
     
     const priceGridLines = 5;
@@ -192,7 +228,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     }
     
     // Draw price labels (logarithmic)
-    ctx.fillStyle = '#9ca3af';
+    ctx.fillStyle = '#6b7280';
     ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -257,8 +293,8 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     });
     
     // Draw chart border
-    ctx.strokeStyle = '#4b5563';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#9ca3af';
+    ctx.lineWidth = 2;
     ctx.strokeRect(marginLeft, marginTop, chartWidth, chartHeight);
   };
 
@@ -278,8 +314,8 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const width = rect.width;
     const height = rect.height;
     
-    // Dark theme background
-    ctx.fillStyle = '#1f2937';
+    // White background
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
     
     const marginTop = 10;
@@ -296,7 +332,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     const rsiRange = rsiMax - rsiMin;
     
     // Draw background
-    ctx.fillStyle = '#374151';
+    ctx.fillStyle = '#f9fafb';
     ctx.fillRect(marginLeft, marginTop, chartWidth, chartHeight);
     
     // Draw RSI background zones (40-60 light purple)
@@ -328,12 +364,17 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     ctx.fill();
     
     // Draw RSI reference lines with dashed borders for 40, 50, 60
-    const referenceLines = [40, 50, 60];
-    referenceLines.forEach(value => {
+    const referenceLines = [
+      { value: 40, color: '#4b5563', width: 1.5 },
+      { value: 50, color: '#6b7280', width: 1 },
+      { value: 60, color: '#4b5563', width: 1.5 }
+    ];
+    
+    referenceLines.forEach(({ value, color, width }) => {
       const y = marginTop + (chartHeight * (rsiMax - value)) / rsiRange;
-      ctx.strokeStyle = value === 50 ? '#6b7280' : '#4b5563';
-      ctx.lineWidth = value === 50 ? 1.5 : 1;
-      ctx.setLineDash([3, 3]); // Dashed line
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash([4, 4]); // Dashed line
       ctx.beginPath();
       ctx.moveTo(marginLeft, y);
       ctx.lineTo(marginLeft + chartWidth, y);
@@ -343,7 +384,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     ctx.setLineDash([]); // Reset to solid lines
     
     // RSI labels
-    ctx.fillStyle = '#9ca3af';
+    ctx.fillStyle = '#6b7280';
     ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -356,7 +397,7 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     
     // Draw Bollinger Bands with light green borders
     ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     ctx.setLineDash([]);
     
     // Upper Bollinger Band
@@ -416,31 +457,31 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
     ctx.stroke();
     
     // Draw chart border
-    ctx.strokeStyle = '#4b5563';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#9ca3af';
+    ctx.lineWidth = 2;
     ctx.strokeRect(marginLeft, marginTop, chartWidth, chartHeight);
   };
 
   return (
     <div 
       ref={containerRef} 
-      className={`bg-gray-800 border border-gray-600 rounded-lg shadow-sm p-2 flex flex-col h-full transition-all duration-300 ${
-        isExpanded ? 'transform scale-105' : ''
+      className={`bg-white border-2 border-gray-300 rounded-lg shadow-sm p-3 flex flex-col h-full transition-all duration-500 ${
+        isExpanded ? 'transform scale-102' : ''
       }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeaveContainer}
     >
-      <div className="flex items-center justify-between mb-1">
-        <div className="text-xs text-gray-400">
-          {displayCandles.length} candles • Zoom: {(zoomLevel * 100).toFixed(0)}% • Scroll to zoom
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-xs text-gray-600">
+          {displayCandles.length} candles • Zoom: {(zoomLevel * 100).toFixed(0)}% • Scroll to zoom • Drag to pan
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold text-white">
+          <div className="text-lg font-bold text-gray-900">
             ${displayCandles.length > 0 ? formatPrice(displayCandles[displayCandles.length - 1].close) : '0.00'}
           </div>
           <div className={`text-xs font-medium ${
             displayCandles.length > 1 && displayCandles[displayCandles.length - 1].close > displayCandles[displayCandles.length - 2].close
-              ? 'text-green-400' : 'text-red-400'
+              ? 'text-green-600' : 'text-red-600'
           }`}>
             {displayCandles.length > 1 && (
               <>
@@ -461,19 +502,20 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
           <canvas
             ref={candleChartRef}
             className="w-full h-full cursor-crosshair"
-            onMouseMove={(e) => handleMouseMove(e, 'price')}
+            onMouseMove={(e) => handleMouseMoveChart(e, 'price')}
             onMouseLeave={handleMouseLeave}
+            onMouseDown={handleMouseDown}
           />
         </div>
         
         {showRSI && (
           <>
-            <div className="h-1 bg-gray-700 border-t border-b border-gray-600 my-1 flex items-center justify-center">
+            <div className="h-1 bg-gray-300 border-t-2 border-b-2 border-gray-400 my-1 flex items-center justify-center">
               <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent"></div>
             </div>
             
             <div className="h-1/4">
-              <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+              <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
                 <span className="font-medium">RSI (14) • Scale: 20-100</span>
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-1">
@@ -493,8 +535,9 @@ export function Chart({ symbol, timeframe, candles, rsi, showRSI = true }: Chart
               <canvas
                 ref={rsiChartRef}
                 className="w-full h-full cursor-crosshair"
-                onMouseMove={(e) => handleMouseMove(e, 'rsi')}
+                onMouseMove={(e) => handleMouseMoveChart(e, 'rsi')}
                 onMouseLeave={handleMouseLeave}
+                onMouseDown={handleMouseDown}
               />
             </div>
           </>

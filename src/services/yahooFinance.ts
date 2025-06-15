@@ -49,8 +49,7 @@ function getYahooParams(timeframe: Timeframe): { interval: string; period: strin
     '1d': { interval: '1d', period: '1y' },
     '1w': { interval: '1wk', period: '2y' },
     '1M': { interval: '1mo', period: '5y' },
-    '3M': { interval: '3mo', period: 'max' },
-    '6M': { interval: '3mo', period: 'max' }
+    '3M': { interval: '3mo', period: 'max' }
   };
 
   if (directSupport[timeframe]) {

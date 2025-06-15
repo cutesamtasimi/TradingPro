@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Timeframe, CustomTimeframe } from '../types/trading';
-import { Plus, X } from 'lucide-react';
+import React from 'react';
+import { Timeframe } from '../types/trading';
 
 interface TimeframeSelectorProps {
   selectedTimeframe: Timeframe;
@@ -9,143 +8,39 @@ interface TimeframeSelectorProps {
 }
 
 const defaultTimeframes: { label: string; value: Timeframe }[] = [
-  { label: '1m', value: '1m' },
-  { label: '5m', value: '5m' },
-  { label: '15m', value: '15m' },
-  { label: '30m', value: '1h' },
-  { label: '1h', value: '1h' },
-  { label: '4h', value: '4h' },
   { label: '1D', value: '1d' },
+  { label: '2D', value: '2d' },
+  { label: '3D', value: '3d' },
+  { label: '4D', value: '4d' },
   { label: '1W', value: '1w' },
-  { label: '1M', value: '1M' }
+  { label: '6D', value: '6d' },
+  { label: '7D', value: '7d' },
+  { label: '2W', value: '2w' },
+  { label: '3W', value: '3w' },
+  { label: '1M', value: '1M' },
+  { label: '5W', value: '5w' },
+  { label: '6W', value: '6w' },
+  { label: '2M', value: '2M' },
+  { label: '3M', value: '3M' }
 ];
 
 export function TimeframeSelector({ selectedTimeframe, onTimeframeChange, className = '' }: TimeframeSelectorProps) {
-  const [showCustom, setShowCustom] = useState(false);
-  const [customTimeframes, setCustomTimeframes] = useState<CustomTimeframe[]>([]);
-  const [customValue, setCustomValue] = useState('');
-  const [customUnit, setCustomUnit] = useState<'days' | 'weeks' | 'months'>('days');
-
-  const allTimeframes = [...defaultTimeframes, ...customTimeframes.map(ct => ({ label: ct.label, value: ct.value as Timeframe }))];
-
-  const addCustomTimeframe = () => {
-    if (!customValue.trim()) return;
-
-    const value = parseInt(customValue);
-    if (isNaN(value) || value <= 0) return;
-
-    let label = '';
-    let timeframeValue = '';
-
-    switch (customUnit) {
-      case 'days':
-        label = `${value}D`;
-        timeframeValue = `${value}d`;
-        break;
-      case 'weeks':
-        label = `${value}W`;
-        timeframeValue = `${value}w`;
-        break;
-      case 'months':
-        label = `${value}M`;
-        timeframeValue = `${value}M`;
-        break;
-    }
-
-    const newCustomTimeframe: CustomTimeframe = {
-      label,
-      value: timeframeValue,
-      [customUnit]: value
-    };
-
-    setCustomTimeframes([...customTimeframes, newCustomTimeframe]);
-    setCustomValue('');
-    setShowCustom(false);
-  };
-
-  const removeCustomTimeframe = (valueToRemove: string) => {
-    setCustomTimeframes(customTimeframes.filter(ct => ct.value !== valueToRemove));
-  };
-
   return (
     <div className={`flex flex-wrap items-center gap-1 ${className}`}>
       <div className="flex flex-wrap gap-1">
-        {allTimeframes.map(({ label, value }) => {
-          const isCustom = customTimeframes.some(ct => ct.value === value);
-          return (
-            <div key={value} className="relative group">
-              <button
-                onClick={() => onTimeframeChange(value)}
-                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
-                  selectedTimeframe === value
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                {label}
-              </button>
-              {isCustom && (
-                <button
-                  onClick={() => removeCustomTimeframe(value)}
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                >
-                  <X className="w-2 h-2" />
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="relative">
-        <button
-          onClick={() => setShowCustom(!showCustom)}
-          className="p-1 text-gray-400 hover:text-gray-300 hover:bg-gray-700 rounded transition-colors"
-          title="Add custom timeframe"
-        >
-          <Plus className="w-3 h-3" />
-        </button>
-
-        {showCustom && (
-          <div className="absolute top-full right-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg p-3 z-20 min-w-48">
-            <div className="space-y-2">
-              <h4 className="text-xs font-medium text-gray-300">Add Custom Timeframe</h4>
-              <div className="flex space-x-1">
-                <input
-                  type="number"
-                  value={customValue}
-                  onChange={(e) => setCustomValue(e.target.value)}
-                  placeholder="Value"
-                  className="flex-1 px-2 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-white"
-                  min="1"
-                />
-                <select
-                  value={customUnit}
-                  onChange={(e) => setCustomUnit(e.target.value as any)}
-                  className="px-2 py-1 border border-gray-600 rounded text-xs focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-white"
-                >
-                  <option value="days">Days</option>
-                  <option value="weeks">Weeks</option>
-                  <option value="months">Months</option>
-                </select>
-              </div>
-              <div className="flex space-x-1">
-                <button
-                  onClick={addCustomTimeframe}
-                  className="flex-1 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
-                >
-                  Add
-                </button>
-                <button
-                  onClick={() => setShowCustom(false)}
-                  className="flex-1 px-2 py-1 bg-gray-600 text-gray-300 text-xs rounded hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {defaultTimeframes.map(({ label, value }) => (
+          <button
+            key={value}
+            onClick={() => onTimeframeChange(value)}
+            className={`px-3 py-1.5 text-sm font-medium rounded transition-colors border ${
+              selectedTimeframe === value
+                ? 'bg-blue-500 text-white border-blue-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );
