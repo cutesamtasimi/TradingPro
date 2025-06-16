@@ -32,7 +32,7 @@ export function TimeframeSelector({ selectedTimeframe, onTimeframeChange, classN
           <button
             key={value}
             onClick={() => onTimeframeChange(value)}
-            className={`px-3 py-1.5 text-sm font-medium rounded transition-colors border ${
+            className={`px-2 py-1 text-xs font-medium rounded transition-colors border ${
               selectedTimeframe === value
                 ? 'bg-blue-500 text-white border-blue-600'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'

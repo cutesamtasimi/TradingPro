@@ -46,9 +46,9 @@ interface YahooSearchResponse {
 function getYahooParams(timeframe: Timeframe): { interval: string; period: string; needsAggregation: boolean; aggregationFactor: number } {
   // For timeframes that Yahoo Finance supports directly
   const directSupport: Record<string, { interval: string; period: string }> = {
-    '1d': { interval: '1d', period: '1y' },
-    '1w': { interval: '1wk', period: '2y' },
-    '1M': { interval: '1mo', period: '5y' },
+    '1d': { interval: '1d', period: '2y' }, // Increased period for more historical data
+    '1w': { interval: '1wk', period: '5y' },
+    '1M': { interval: '1mo', period: '10y' },
     '3M': { interval: '3mo', period: 'max' }
   };
 
@@ -61,7 +61,7 @@ function getYahooParams(timeframe: Timeframe): { interval: string; period: strin
     const days = parseInt(timeframe.replace('d', ''));
     return { 
       interval: '1d', 
-      period: `${Math.min(days * 200, 730)}d`, // Limit to 2 years max
+      period: `${Math.min(days * 300, 1000)}d`, // Increased for more data
       needsAggregation: true, 
       aggregationFactor: days 
     };
@@ -71,7 +71,7 @@ function getYahooParams(timeframe: Timeframe): { interval: string; period: strin
     const weeks = parseInt(timeframe.replace('w', ''));
     return { 
       interval: '1wk', 
-      period: `${Math.min(weeks * 100, 260)}wk`, // Limit to 5 years max
+      period: `${Math.min(weeks * 150, 400)}wk`, // Increased for more data
       needsAggregation: true, 
       aggregationFactor: weeks 
     };
@@ -81,14 +81,14 @@ function getYahooParams(timeframe: Timeframe): { interval: string; period: strin
     const months = parseInt(timeframe.replace('M', ''));
     return { 
       interval: '1mo', 
-      period: `${Math.min(months * 50, 120)}mo`, // Limit to 10 years max
+      period: `${Math.min(months * 80, 200)}mo`, // Increased for more data
       needsAggregation: true, 
       aggregationFactor: months 
     };
   }
 
   // Default fallback
-  return { interval: '1d', period: '1y', needsAggregation: false, aggregationFactor: 1 };
+  return { interval: '1d', period: '2y', needsAggregation: false, aggregationFactor: 1 };
 }
 
 // Format symbol for Yahoo Finance (add exchange suffix for Indian stocks)
@@ -198,6 +198,11 @@ export async function fetchChartData(symbol: string, timeframe: Timeframe): Prom
     // Apply custom aggregation if needed
     if (needsAggregation && aggregationFactor > 1) {
       candles = aggregateCandles(candles, aggregationFactor);
+    }
+    
+    // Limit to 500 candles maximum for performance
+    if (candles.length > 500) {
+      candles = candles.slice(-500);
     }
     
     // Calculate RSI and related indicators using improved method

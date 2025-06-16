@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, TrendingUp, TrendingDown, X, Globe, MapPin, Edit2, Trash2, FolderPlus, Save, MoreVertical } from 'lucide-react';
+import { Search, Plus, TrendingUp, TrendingDown, X, Globe, MapPin, Edit2, Trash2, FolderPlus, Save, MoreVertical, ChevronDown, ChevronRight } from 'lucide-react';
 import { Symbol, Watchlist, WatchlistData } from '../types/trading';
 import { fetchSymbolData, searchSymbols, POPULAR_SYMBOLS } from '../services/yahooFinance';
 
@@ -8,6 +8,13 @@ interface WatchlistManagerProps {
   onSymbolSelect: (symbol: string) => void;
   watchlists: Watchlist[];
   onWatchlistsUpdate: (watchlists: Watchlist[]) => void;
+}
+
+interface WatchlistSection {
+  id: string;
+  name: string;
+  symbols: string[];
+  expanded: boolean;
 }
 
 export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, onWatchlistsUpdate }: WatchlistManagerProps) {
@@ -24,6 +31,7 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
   const [editingWatchlist, setEditingWatchlist] = useState<string | null>(null);
   const [editWatchlistName, setEditWatchlistName] = useState('');
   const [showWatchlistMenu, setShowWatchlistMenu] = useState<string | null>(null);
+  const [sections, setSections] = useState<WatchlistSection[]>([]);
 
   // Initialize with default watchlist if none exist
   useEffect(() => {
@@ -41,6 +49,36 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
       setActiveWatchlistId(watchlists[0].id);
     }
   }, [watchlists, activeWatchlistId, onWatchlistsUpdate]);
+
+  // Initialize sections for active watchlist
+  useEffect(() => {
+    const activeWatchlist = watchlists.find(w => w.id === activeWatchlistId);
+    if (activeWatchlist) {
+      // Create default sections based on symbol types
+      const defaultSections: WatchlistSection[] = [
+        {
+          id: 'us-stocks',
+          name: 'US Stocks',
+          symbols: activeWatchlist.symbols.filter(s => !s.includes('.NS') && !s.includes('.BO') && !s.includes('-USD')),
+          expanded: true
+        },
+        {
+          id: 'indian-stocks',
+          name: 'Indian Stocks',
+          symbols: activeWatchlist.symbols.filter(s => s.includes('.NS') || s.includes('.BO')),
+          expanded: true
+        },
+        {
+          id: 'crypto',
+          name: 'Cryptocurrency',
+          symbols: activeWatchlist.symbols.filter(s => s.includes('-USD')),
+          expanded: true
+        }
+      ].filter(section => section.symbols.length > 0);
+
+      setSections(defaultSections);
+    }
+  }, [activeWatchlistId, watchlists]);
 
   const activeWatchlist = watchlists.find(w => w.id === activeWatchlistId);
   const activeWatchlistData = watchlistsData.find(wd => wd.watchlist.id === activeWatchlistId);
@@ -162,6 +200,53 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
 
   const addPopularSymbol = (symbol: string) => {
     addToWatchlist(symbol);
+  };
+
+  const toggleSection = (sectionId: string) => {
+    setSections(prev => prev.map(section => 
+      section.id === sectionId 
+        ? { ...section, expanded: !section.expanded }
+        : section
+    ));
+  };
+
+  const renderSymbolItem = (symbol: Symbol) => {
+    const changePercent = isNaN(symbol.changePercent) ? 0 : symbol.changePercent;
+    
+    return (
+      <div
+        key={symbol.symbol}
+        className={`group p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors ${
+          selectedSymbol === symbol.symbol ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+        }`}
+        onClick={() => onSymbolSelect(symbol.symbol)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="font-semibold text-gray-900 text-sm truncate">{symbol.symbol}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFromWatchlist(symbol.symbol);
+                }}
+                className="p-0.5 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-gray-300"
+              >
+                <X className="w-2 h-2 text-gray-600" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-sm text-gray-900">${symbol.price.toFixed(2)}</span>
+              <div className={`text-xs font-medium ${
+                changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -393,7 +478,7 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
         )}
       </div>
 
-      {/* Compact Watchlist Content */}
+      {/* Compact Watchlist Content with Sections */}
       <div className="flex-1 overflow-y-auto bg-gray-50">
         {loading && (!activeWatchlistData || activeWatchlistData.symbolData.length === 0) ? (
           <div className="p-3 text-center text-gray-600 text-xs">Loading...</div>
@@ -403,50 +488,38 @@ export function WatchlistManager({ selectedSymbol, onSymbolSelect, watchlists, o
             <div className="text-xs">Click + to add symbols</div>
           </div>
         ) : (
-          activeWatchlistData?.symbolData.map((symbol) => (
-            <div
-              key={symbol.symbol}
-              className={`group p-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors ${
-                selectedSymbol === symbol.symbol ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-              }`}
-              onClick={() => onSymbolSelect(symbol.symbol)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-gray-900 text-sm truncate">{symbol.symbol}</span>
-                      {symbol.symbol.includes('.NS') && (
-                        <span className="text-xs bg-orange-100 text-orange-700 px-1 rounded border border-orange-200">NSE</span>
-                      )}
-                      {symbol.symbol.includes('-USD') && (
-                        <span className="text-xs bg-yellow-100 text-yellow-700 px-1 rounded border border-yellow-200">₿</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFromWatchlist(symbol.symbol);
-                      }}
-                      className="p-0.5 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-gray-300"
-                    >
-                      <X className="w-2 h-2 text-gray-600" />
-                    </button>
+          sections.map((section) => {
+            const sectionSymbols = activeWatchlistData?.symbolData.filter(symbol => 
+              section.symbols.includes(symbol.symbol)
+            ) || [];
+
+            if (sectionSymbols.length === 0) return null;
+
+            return (
+              <div key={section.id} className="border-b border-gray-200">
+                <button
+                  onClick={() => toggleSection(section.id)}
+                  className="w-full px-3 py-2 bg-gray-100 hover:bg-gray-200 flex items-center justify-between text-left border-b border-gray-200"
+                >
+                  <span className="text-xs font-medium text-gray-700">{section.name}</span>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs text-gray-500">({sectionSymbols.length})</span>
+                    {section.expanded ? (
+                      <ChevronDown className="w-3 h-3 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="w-3 h-3 text-gray-500" />
+                    )}
                   </div>
-                  <div className="text-xs text-gray-600 mb-1 truncate">{symbol.name}</div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-gray-900">${symbol.price.toFixed(2)}</span>
-                    <div className={`flex items-center space-x-1 text-xs ${
-                      symbol.change >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {symbol.change >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      <span>{symbol.changePercent >= 0 ? '+' : ''}{symbol.changePercent.toFixed(1)}%</span>
-                    </div>
+                </button>
+                
+                {section.expanded && (
+                  <div>
+                    {sectionSymbols.map(renderSymbolItem)}
                   </div>
-                </div>
+                )}
               </div>
-            </div>
-          )) || []
+            );
+          })
         )}
       </div>
 

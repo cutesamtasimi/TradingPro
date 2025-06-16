@@ -106,36 +106,36 @@ export function SingleChart({ symbol, viewMode, onViewModeChange }: SingleChartP
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* View Mode Toggle */}
-            <div className="flex bg-gray-100 rounded p-0.5 border border-gray-300">
-              <button
-                onClick={() => onViewModeChange('single')}
-                className={`px-3 py-1.5 text-sm font-medium rounded transition-colors flex items-center space-x-1 ${
-                  viewMode === 'single'
-                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Single</span>
-              </button>
-              <button
-                onClick={() => onViewModeChange('multi')}
-                className={`px-3 py-1.5 text-sm font-medium rounded transition-colors flex items-center space-x-1 ${
-                  viewMode === 'multi'
-                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-                <span>Multi</span>
-              </button>
-            </div>
-
             <TimeframeSelector
               selectedTimeframe={selectedTimeframe}
               onTimeframeChange={setSelectedTimeframe}
             />
+
+            {/* Compact View Mode Toggle */}
+            <div className="flex bg-gray-100 rounded p-0.5 border border-gray-300">
+              <button
+                onClick={() => onViewModeChange('single')}
+                className={`px-2 py-1.5 text-sm font-medium rounded transition-colors flex items-center ${
+                  viewMode === 'single'
+                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+                title="Single Chart View"
+              >
+                S
+              </button>
+              <button
+                onClick={() => onViewModeChange('multi')}
+                className={`px-2 py-1.5 text-sm font-medium rounded transition-colors flex items-center ${
+                  viewMode === 'multi'
+                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+                title="Multi Chart View"
+              >
+                M
+              </button>
+            </div>
             
             <button
               onClick={fetchData}
